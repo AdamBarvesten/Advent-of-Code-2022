@@ -1,42 +1,61 @@
 package dec01;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.Collections;
+import java.util.PriorityQueue;
+import java.util.Scanner;
 
 public class Dec01 {
-    public static void main(String[] args) throws IOException {        
-        BufferedReader reader = new BufferedReader(new FileReader("dec01/input.txt"));
-        String line = reader.readLine();
-        int[] topCal = new int[]{0, 0, 0};
-        int tempcal = 0;
 
-        while(line != null){
-            if(line.equals("")){
-                if(tempcal > topCal[0] ){
-                    topCal[2] = topCal[1];
-                    topCal[1] = topCal[0];
-                    topCal[0] = tempcal;
-                }
-                else if(tempcal > topCal[1]){
-                    topCal[2] = topCal[1];
-                    topCal[1] = tempcal;
-                }
-                else if(tempcal > topCal[2]){
-                    topCal[2] = tempcal;
-                }
+    public static void main(String[] args) throws FileNotFoundException {
+        File file = new File("dec01/input.txt");
 
-                tempcal = 0;
-                line = reader.readLine();
-                
-            }else{
-                tempcal += Integer.parseInt(line);
-                line = reader.readLine();
-            }
+        System.out.println("Answer part one: " + partOne(new Scanner(file)));
+        System.out.println("Answer part two: " + partTwo(new Scanner(file)));
+    }
+
+    private static int partOne(Scanner scanner) {
+        int elf = 0, max = 0;
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+
+            elf = line.equals("") ? 0 : elf + Integer.parseInt(line);
+            max = Math.max(elf, max);
         }
-        reader.close();
+        return max;
+    }
 
-        System.out.println(topCal[0]);
-        System.out.println(topCal[0] + topCal[1] + topCal[2]);
+    private static int partTwo(Scanner scanner){
+        int elf = 0;
+        PriorityQueue<Integer> pq = new PriorityQueue<>(Collections.nCopies(3, 0));
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+
+            if(line.equals("")){
+                updateQueueIfNecessary(elf, pq);
+                elf=0;
+                continue;
+            }
+
+            elf += Integer.parseInt(line);
+
+            if(!scanner.hasNextLine()) updateQueueIfNecessary(elf, pq);
+        }
+        return pq.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    /**
+     * This method updates the queue if an elf has more than any of the top three most calories
+     *
+     * @param elf The amount of calories the elf has.
+     * @param pq The priority queue with top three most calories
+     */
+    private static void updateQueueIfNecessary(int elf, PriorityQueue<Integer> pq) {
+        if (elf > pq.peek()) {
+            pq.poll();
+            pq.offer(elf);
+        }
     }
 }
