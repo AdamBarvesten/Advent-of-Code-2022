@@ -1,101 +1,114 @@
 package dec02;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+import java.io.*;
+import java.util.Scanner;
 
 public class Dec02 {
-    public static void main(String[] args) throws IOException {
+    private static final int WIN = 6;
+    private static final int DRAW = 3;
+    private static final int LOOSE = 0;
+    private static final char ROCK = 'A';
+    private static final char PAPER = 'B';
+    private static final char SCISSORS = 'C';
+    private static final int ROCK_POINTS = 1;
+    private static final int PAPER_POINTS = 2;
+    private static final int SCISSORS_POINTS = 3;
 
-        List<String> input = Files.readAllLines(Paths.get("dec02/input.txt"));
-
-        System.out.println(solve1(input));
-        System.out.println(solve2(input));
+    public static void main(String[] args) throws FileNotFoundException {
+        File file = new File("dec02/input.txt");
+        System.out.println("Answer part one: " + partOne(new Scanner(file)));
+        System.out.println("Answer part two: " + partTwo(new Scanner(file)));
     }
 
-    private static int solve2(List<String> input){
+    private static int partOne(Scanner scanner) {
+        String[] moves;
         int score = 0;
 
-        for (String line : input) {
-            switch(line.charAt(2)){
-                case 'X':  // loose
-                    score += 0;
-                    score += Loose(line.charAt(0));
-                    break;
-                case 'Y': 
-                    score += 3;
-                    score += Draw(line.charAt(0));
-                    break;
-                case 'Z': 
-                    score += 6;
-                    score += Win(line.charAt(0));
-                    break;
-            }
+        while(scanner.hasNextLine()){
+            moves = scanner.nextLine().split(" ");
+            score += matchScore(moves[0].charAt(0), moves[1].charAt(0)) + moveScore(moves[1].charAt(0));
         }
+
         return score;
     }
 
-    private static int solve1(List<String> input){
-        int score = 0;
+    private static int moveScore(char player) {
+        return switch (player) {
+            case 'X' -> ROCK_POINTS;
+            case 'Y' -> PAPER_POINTS;
+            case 'Z' -> SCISSORS_POINTS;
+            default -> Integer.MIN_VALUE;
+        };
+    }
 
-        for (String line : input) {
-            switch(line.charAt(2)){
-                case 'X': 
-                    score += 1;
-                    score += Rock(line.charAt(0));
-                    break;
-                case 'Y': 
-                    score += 2;
-                    score += Paper(line.charAt(0)); 
-                    break;
-                case 'Z': 
-                    score += 3;
-                    score += Scissors(line.charAt(0)); 
-                    break;
+    private static int matchScore(Character opponent, Character player){
+        if(opponent == ROCK){
+            switch (player){
+                case 'X': return DRAW;
+                case 'Y': return WIN;
+                case 'Z': return LOOSE;
             }
         }
+        if(opponent == PAPER){
+            switch (player){
+                case 'X': return LOOSE;
+                case 'Y': return DRAW;
+                case 'Z': return WIN;
+            }
+        }
+        if(opponent == SCISSORS){
+            switch (player){
+                case 'X': return WIN;
+                case 'Y': return LOOSE;
+                case 'Z': return DRAW;
+            }
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    private static int partTwo(Scanner scanner){
+        String[] moves;
+        int score = 0;
+
+        while(scanner.hasNextLine()){
+            moves = scanner.nextLine().split(" ");
+            score += matchScore2(moves[1].charAt(0)) + moveScore2(moves[0].charAt(0), moves[1].charAt(0));
+        }
+
         return score;
     }
 
-    private static int Loose(char p1){
-        if(p1 == 'A') return 3;
-        if(p1 == 'B') return 1;
-        return 2;
+    private static int matchScore2(Character player){
+        return switch (player) {
+            case 'X' -> LOOSE;
+            case 'Y' -> DRAW;
+            case 'Z' -> WIN;
+            default -> Integer.MIN_VALUE;
+        };
     }
 
-    private static int Draw(char p1){
-        if(p1 == 'A') return 1;
-        if(p1 == 'B') return 2;
-        return 3;
+    private static int moveScore2(char opponent, char player) {
+        if(player == 'X'){
+            switch (opponent){
+                case ROCK : return SCISSORS_POINTS;
+                case PAPER : return ROCK_POINTS;
+                case SCISSORS : return PAPER_POINTS;
+            }
+        }
+        if(player == 'Y'){
+            switch (opponent){
+                case ROCK : return ROCK_POINTS;
+                case PAPER : return PAPER_POINTS;
+                case SCISSORS : return SCISSORS_POINTS;
+            }
+        }
+        if(player == 'Z'){
+            switch (opponent){
+                case ROCK : return PAPER_POINTS;
+                case PAPER : return SCISSORS_POINTS;
+                case SCISSORS : return ROCK_POINTS;
+            }
+        }
+        return Integer.MIN_VALUE;
     }
-
-    private static int Win(char p1){
-        if(p1 == 'A') return 2;
-        if(p1 == 'B') return 3;
-        return 1;
-    }
-
-    // loose: -1 , draw: 0 , win: 1
-    private static int Rock(char p1){
-        if(p1 == 'C') return 6;
-        if(p1 == 'A') return 3;
-        
-        return 0;
-    }
-
-    private static int Paper(char p1){
-        if(p1 == 'A') return 6;
-        if(p1 == 'B') return 3;
-        
-        return 0;
-    }
-
-    private static int Scissors(char p1){
-        if(p1 == 'B') return 6;
-        if(p1 == 'C') return 3;
-        
-        return 0;
-    }
-    
 }
